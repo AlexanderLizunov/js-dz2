@@ -35,7 +35,7 @@ function isAllTrue(array, fn) {
  Зарпещено использовать встроенные методы для работы с массивами
  */
 function isSomeTrue(array, fn) {
-    if (array.constructor != Array || array.length === 0) {
+    if (array.constructor != Array || !array.length) {
         throw new Error("empty array");
     }
     if (typeof fn != "function") {
@@ -47,7 +47,7 @@ function isSomeTrue(array, fn) {
             return true;
         }
     }
-    return true;
+    return false;
 }
 
 /*
@@ -58,21 +58,22 @@ function isSomeTrue(array, fn) {
  Необходимо выбрасывать исключение в случаях:
  - fn не является функцией (с текстом "fn is not a function")
  */
-function returnBadArguments(fn, ...arg) {
-    if (typeof fn != "function") {
-        throw new Error("fn is not a function");
+function returnBadArguments(fn) {
+    if (typeof fn !== 'function') {
+        throw new Error('fn is not a function');
     }
-    try {
-        var a = [];
-        for (var i = 0; i < arg.length; i++) {
-            if (!fn(arg[i])) {
-                a.push(arg[i]);
-            }
+
+    var a = [];
+
+    for (var i = 1; i < arguments.length; i++) {
+        try {
+            fn(arguments[i]);
+        } catch (e) {
+            a.push(arguments[i])
         }
-        return a;
-    } catch (e) {
-        console.log(e.message);
     }
+
+    return a;
 }
 
 /*
@@ -90,51 +91,65 @@ function returnBadArguments(fn, ...arg) {
  - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
 function calculator(number = 0) {
-    if (typeof number !== "number") {
-        throw new Error("number is not a number");
+
+    if (typeof number === 'undefined') {
+        number = 0;
+    } else if (typeof number !== 'number') {
+        throw new Error('number is not a number');
     }
 
-    try {
-        var calc = {
-            num: number,
-            sum: function (...arg) {
-                var sum = this.num;
-                for (var i = 0; i < arg.length; i++) {
-                    sum += arg[i];
-                }
-                return sum;
-            },
-            dif: function (...arg) {
-
-                var dif = this.num;
-                for (var i = 0; i < arg.length; i++) {
-                    dif = dif - arg[i];
-                }
-                return dif;
-            },
-            div: function (...arg) {
-
-                var div = this.num;
-                for (var i = 0; i < arg.length; i++) {
-                    if (arg[i] === 0) {
-                        throw new Error("division by 0");
-                    }
-                    div = div / arg[i];
-                }
-                return div;
-            },
-            mul: function (...arg) {
-
-                var mul = this.num;
-                for (var i = 0; i < arg.length; i++) {
-                    mul = mul * arg[i];
-                }
-                return mul;
+    function _sum() {
+        var result = number;
+        for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
             }
-        };
-        return calc;
-    } catch (e) {
-        console.log(e.message);
+            result += arguments[i];
+        }
+        return result;
+    }
+
+    function _dif() {
+        var result = number;
+        for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
+            result -= arguments[i];
+        }
+        return result;
+    }
+
+    function _div() {
+        var result = number;
+
+        for (var i = 0; i < arguments.length; i++) {
+            if (arguments[i] === 0) {
+                throw new Error('division by 0')
+            }
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
+            result /= arguments[i];
+        }
+        return result;
+    }
+
+    function _mul() {
+        var result = number;
+        for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
+            result *= arguments[i];
+        }
+        return result;
+    }
+    return {
+        sum: _sum,
+        dif: _dif,
+        div: _div,
+        mul: _mul
     }
 }
 
